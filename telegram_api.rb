@@ -1,4 +1,6 @@
 # encoding: utf-8
+# +0018188050365
+
 lib = File.join(File.dirname(__FILE__), 'lib')
 $:.unshift lib unless $:.include?(lib)
 
@@ -27,11 +29,11 @@ def refresh_token
   return res["access_token"]  
 end
 
-dev_daemon  = '../../../../tests/tg/bin/telegram-cli'
-prod_daemon = '../tg/bin/telegram-cli'
+dev_daemon  = File.dirname(__FILE__)+'/../../../../tests/tg/bin/telegram-cli'
+prod_daemon = File.dirname(__FILE__)+'/../tg/bin/telegram-cli'
 
-drive_session   = GoogleDrive.login_with_oauth(refresh_token)
-worksheet       = drive_session.file_by_title(SHEET_NAME).worksheets.last
+#drive_session   = GoogleDrive.login_with_oauth(refresh_token)
+#worksheet       = drive_session.file_by_title(SHEET_NAME).worksheets.last
 
 default_message = worksheet[2, 4]
 
@@ -43,8 +45,9 @@ EM.run do
   telegram = Telegram::Client.new do |cfg|
     cfg.daemon = prod_daemon
   end
- 
+
   telegram.connect do
+=begin     
     (2..worksheet.num_rows).each do |row|
       telegram.add_contact("+"+worksheet[row, 1].strip, "_", worksheet[row, 3].strip) do |success, data| 
         puts success
@@ -55,7 +58,7 @@ EM.run do
         end
       end
     end
-    
+=end    
     #telegram.msg("m_de(124284736)", "Hi Yahya")
     #telegram.update_contacts!
     #telegram.add_contact("+212690586989", "sara", "yahya") do |success, data|      
@@ -70,9 +73,9 @@ EM.run do
     #c = Telegram::TelegramContact.pick_or_new(telegram, {'print_name' => 'rahmani', 'phone' => '+21290586989', 'username' => 'yahya'} )
     #puts c
 
-#    telegram.contacts.each do |contact|
-#      puts contact
-#    end
+    telegram.contacts.each do |contact|
+      puts contact
+    end
 #    telegram.chats.each do |chat|
 #      puts chat
 #    end
