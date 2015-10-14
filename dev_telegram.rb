@@ -11,8 +11,7 @@ EM.run do
     cfg.daemon = '../../../../tests/tg/bin/telegram-cli'
     cfg.key    = 'tg-server.pub'
   end
-
-  
+ 
   telegram.connect do
     #telegram.msg("m_de(124284736)", "Hi Yahya")
     #telegram.update_contacts!
@@ -21,17 +20,11 @@ EM.run do
     #    puts dat
     #  end
     #end  
-
   
     #puts telegram.methods
     #puts telegram.profile
 
     #c = Telegram::TelegramContact.pick_or_new(telegram, {'print_name' => 'rahmani', 'phone' => '+21290586989', 'username' => 'yahya'} )
-
-
-
-
-
 
     #puts c
     telegram.contacts.each do |contact|
@@ -41,8 +34,9 @@ EM.run do
       puts chat
     end
     
-    telegram.on[Telegram::EventType::RECEIVE_MESSAGE] = Proc.new { |ev|
+    exit
+    #telegram.on[Telegram::EventType::RECEIVE_MESSAGE] = Proc.new { |ev|
       
-    }
+    #}
   end
 end

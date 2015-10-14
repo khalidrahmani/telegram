@@ -2,17 +2,59 @@
 lib = File.join(File.dirname(__FILE__), 'lib')
 $:.unshift lib unless $:.include?(lib)
 
+require 'google/api_client'
+require 'google_drive'
 require 'eventmachine'
 require 'telegram'
 require 'json'
+require 'typhoeus'
+
+CLIENT_ID          = "833494348776-pme294i5e5bui19d9e3nj3g9mhov6lgj.apps.googleusercontent.com"
+CLIENT_SECRET      = "k0CwXlTPOcF18OvUI1FiRNhG"
+REFRESH_TOKEN      = "1/LdkEyZQ5oP9NUQlEU6lgMiFEoGGv9dxCYZGGGfAhvvA"
+
+SHEET_NAME         = "Telegram"
+
+def refresh_token
+  data = {
+    :client_id =>     CLIENT_ID,
+    :client_secret => CLIENT_SECRET,
+    :refresh_token => REFRESH_TOKEN,
+    :grant_type =>    "refresh_token"
+  }
+  res = Typhoeus.post("https://accounts.google.com/o/oauth2/token", body: data)
+  res = JSON.parse(res.body)
+  return res["access_token"]  
+end
+
+dev_daemon  = '../../../../tests/tg/bin/telegram-cli'
+prod_daemon = '../tg/bin/telegram-cli'
+
+drive_session   = GoogleDrive.login_with_oauth(refresh_token)
+worksheet       = drive_session.file_by_title(SHEET_NAME).worksheets.last
+
+default_message = worksheet[2, 4]
+
+# rm -rf .telegram-cli/
+# run telegram-cli
+# add new phone number
 
 EM.run do
   telegram = Telegram::Client.new do |cfg|
-    cfg.daemon = 'telegram-cli'
-    cfg.key    = File.dirname(__FILE__)+'/tg-server.pub'
+    cfg.daemon = prod_daemon
   end
  
   telegram.connect do
+    (2..worksheet.num_rows).each do |row|
+      telegram.add_contact("+"+worksheet[row, 1].strip, "_", worksheet[row, 3].strip) do |success, data| 
+        puts success
+        puts data     
+        message = worksheet[row, 4].strip == "" ? default_message : worksheet[row, 4].strip
+        telegram.msg(data[0]['type']+"#"+data[0]['id'].to_s, message) do |success, dat|
+          puts dat
+        end
+      end
+    end
     
     #telegram.msg("m_de(124284736)", "Hi Yahya")
     #telegram.update_contacts!
@@ -28,15 +70,12 @@ EM.run do
     #c = Telegram::TelegramContact.pick_or_new(telegram, {'print_name' => 'rahmani', 'phone' => '+21290586989', 'username' => 'yahya'} )
     #puts c
 
-    telegram.contacts.each do |contact|
-      puts contact
-    end
-    telegram.chats.each do |chat|
-      puts chat
-    end
-     
-    telegram.on[Telegram::EventType::RECEIVE_MESSAGE] = Proc.new { |ev|
-       
-    }
+#    telegram.contacts.each do |contact|
+#      puts contact
+#    end
+#    telegram.chats.each do |chat|
+#      puts chat
+#    end
+#    exit 0    
   end
 end
