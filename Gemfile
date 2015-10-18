@@ -1,11 +1,6 @@
 source 'https://rubygems.org'
 
-gem 'eventmachine'
-gem 'em-synchrony'
-gem 'em-http-request'
 gem 'activesupport'
-gem 'fastimage'
-gem 'oj'
 gem 'google-api-client'
 gem 'google_drive'
 gem 'typhoeus'

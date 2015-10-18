@@ -13,8 +13,8 @@ module Telegram
       EM.synchrony do
         multi = EM::Synchrony::Multi.new
         multi.add :profile, update_profile!
-        multi.add :contacts, update_contacts!
-        multi.add :chats, update_chats!
+        #multi.add :contacts, update_contacts!
+        #multi.add :chats, update_chats!
         multi.perform
         done = true
       end
@@ -253,6 +253,17 @@ module Telegram
     def add_contact(phone, first_name, last_name, &callback)
       assert!
       @connection.communicate(['add_contact', phone, first_name, last_name], &callback)
+    end
+    
+    #add_contact  <phone-number> <first-name> <last-name>
+    def safe_quit(&callback)
+      assert!
+      @connection.communicate(['safe_quit'], &callback)
+    end
+
+    def broadcast(contacts, text, &callback)
+      assert!
+      @connection.communicate(['broadcast', contacts, text], &callback)
     end
 
     protected
